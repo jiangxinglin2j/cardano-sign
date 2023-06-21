@@ -65,16 +65,12 @@ class Wallet extends React.Component {
   initSigner = async () => {
     // await Signer.init("ogmios.wanchain.org", 1337);
     const sdkWallet = await this.getCardanoWallet();
-    let cardanoSigner = new CardanoExtension.Signer("testnet", sdkWallet.provider); 
+    let cardanoSigner = new CardanoExtension.Signer("testnet", sdkWallet); 
     await cardanoSigner.init("ogmios.wanchain.org", 1337); 
     return cardanoSigner;
   }
 
-  signedTx = async (update = { 
-    newOracleWorker: "addr_test1qz6twkzgss75sk379u0e27phvwhmtqqfuhl5gnx7rh7nux2xg4uwrhx9t58far8hp3a06hfdfzlsxgfrzqv5ryc78e4s4dwh26" 
-  }, signData = [ 
-    "addr_test1qzqchffrha5hjcztwx0p48wtv0y36hw098rdw366fqlzuymun97wgelqtwe9aladfx2pukf4jdfqtjh7cnja50y247dsnalv6f" 
-  ]) => {
+  signedTx = async (update, signData) => {
     const signer = await this.initSigner();
     const signedTxData = await signer.updateGroupNFT( update, signData ); 
     console.log({signedTxData}); 
