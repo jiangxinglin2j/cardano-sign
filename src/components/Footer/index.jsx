@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { styled } from 'styled-components';
 import { Button } from "antd/es";
+import { addLocalObjItem, getLocalData, removeLocalObjItem } from "../../utils/local";
+import { subStrFn } from "../../utils/tools";
+import { Tooltip } from 'antd';
 
 const FooterCon = styled.div`
   width: 500px;
@@ -50,14 +53,28 @@ const AddressCon = styled.ul`
   flex-direction: column;
 `;
 
-const AddresssItem = styled.li`
-  display: flex;
+const AddresssItem = styled.div`
   padding: 0 5px;
   border: 1px solid #1677ff;
   font-size: 14px;
-  height: 20px;
+  height: 30px;
+  line-height: 30px;
   margin-bottom: 10px;
   border-radius: 4px;
+  position: relative;
+`;
+
+const CloseBtn = styled.div`
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  text-align: center;
+  line-height: 24px;
+  cursor: pointer;
 `;
 
 const AddressInp = styled.input`
@@ -76,16 +93,37 @@ const AddBtn = styled(Button)`
 `;
 
 function Footer() {
-  const [addressArr, setAddressArr] = useState([]);
+  const localSign = useMemo(() => {
+    const signObj = getLocalData('sign') || {};
+    return Object.values(signObj);
+  }, []);
+
+  const [addressArr, setAddressArr] = useState(localSign);
   const [inp, setInp] = useState('');
   const [showFooter, setShowFooter] = useState(true);
 
   const addAddressFn = () => {
     const arr = JSON.parse(JSON.stringify(addressArr));
-    arr.push(inp);
+    const time = new Date().getTime().toString();
+    const obj = {
+      key: time,
+      value: inp
+    };
+    arr.push(obj); 
     setAddressArr(arr);
     setInp('');
+    addLocalObjItem('sign', time, obj);
   };
+
+  const removeItemFn = (key) => {
+    const arr = JSON.parse(JSON.stringify(addressArr));
+    const index = arr.findIndex(v => v.key === key);
+    if (index > -1) {
+      arr.splice(index, 1);
+      setAddressArr(arr);
+      removeLocalObjItem('sign', key);
+    }
+  }
 
   const handleInp = e => {
     setInp(e.target.value);
@@ -102,9 +140,14 @@ function Footer() {
       <AddressCon>
         {
           addressArr.map((item) => (
-            <AddresssItem key={item}>
-              { item }
-            </AddresssItem>
+            <li key={item.key}>
+              <Tooltip title={item.value} overlayStyle={{maxWidth: '500px', width: '500px'}}>
+                <AddresssItem>
+                  { subStrFn(item.value, 16, 10) }
+                  <CloseBtn onClick={() => removeItemFn(item.key)}>❌</CloseBtn>
+                </AddresssItem>
+              </Tooltip>
+            </li>
           ))
         }
       </AddressCon>

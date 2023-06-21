@@ -1,5 +1,5 @@
 import React from "react";
-import { CardanoExtension, Signer } from 'wanchain-cross-sdk';
+import { CardanoExtension } from 'wanchain-cross-sdk';
 
 export const network = 'testnet';
 
